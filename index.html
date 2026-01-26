@@ -2,33 +2,98 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>多因子辨識系統後台</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="辨識系統">
+    <link rel="apple-touch-icon" href="icon.png">
+
     <style>
-        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; text-align: center; background: #1a1a2e; color: white; padding-top: 50px; }
-        .container { background: #16213e; padding: 30px; border-radius: 20px; display: inline-block; box-shadow: 0 15px 35px rgba(0,0,0,0.5); border: 1px solid #0f3460; }
-        h1 { color: #e94560; margin-bottom: 30px; }
-        .light { width: 45px; height: 45px; border-radius: 50%; display: inline-block; background: #533440; margin: 8px; transition: 0.4s; border: 2px solid #1a1a2e; }
-       
-        .active { background: #00d2ff; box-shadow: 0 0 20px #00d2ff, 0 0 40px #00d2ff; border-color: #fff; }
-        #status { font-size: 1.5em; font-weight: bold; margin: 20px 0; color: #00d2ff; }
-        #msg { font-style: italic; color: #95a5a6; background: #0f3460; padding: 10px; border-radius: 10px; min-width: 200px; display: inline-block; }
+        body { 
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
+            text-align: center; 
+            background: #1a1a2e; 
+            color: white; 
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; /* 讓內容垂直居中 */
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .container { 
+            background: #16213e; 
+            padding: 2rem; 
+            border-radius: 25px; 
+            width: 85%; /* 手機端佔寬 85% */
+            max-width: 450px; /* 電腦端最大寬度 */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+            border: 1px solid #0f3460; 
+            box-sizing: border-box;
+        }
+
+        h1 { color: #e94560; margin-bottom: 2rem; font-size: 1.5rem; }
+
+        /* 燈號自響應：使用 flex 讓它們自動換行或縮放 */
+        #lights {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 1.5rem;
+        }
+
+        .light { 
+            width: 50px; 
+            height: 50px; 
+            border-radius: 50%; 
+            background: #333; 
+            transition: 0.4s; 
+            border: 2px solid #1a1a2e; 
+        }
+
+        /* 當螢幕很小時（如舊款 iPhone），縮小燈號避免排不下 */
+        @media (max-width: 380px) {
+            .light { width: 40px; height: 40px; }
+            .container { padding: 1.5rem; }
+        }
+
+        .active { 
+            background: #00d2ff; 
+            box-shadow: 0 0 15px #00d2ff, 0 0 30px #00d2ff; 
+            border-color: #fff; 
+        }
+
+        #status { font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem; color: #00d2ff; }
+        
+        #msg { 
+            font-style: italic; color: #95a5a6; background: #0f3460; 
+            padding: 15px; border-radius: 12px; width: 100%;
+            display: inline-block; word-break: break-all;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>多因子辨識系統後台</h1>
+        <h1>多因子辨識監控</h1>
         <div id="status">連線中...</div>
         <div id="lights">
-            <div id="L1" class="list-light light"></div>
-            <div id="L2" class="list-light light"></div>
-            <div id="L3" class="list-light light"></div>
-            <div id="L4" class="list-light light"></div>
-            <div id="L5" class="list-light light"></div>
-            <div id="L6" class="list-light light"></div>
+            <div id="L1" class="light"></div>
+            <div id="L2" class="light"></div>
+            <div id="L3" class="light"></div>
+            <div id="L4" class="light"></div>
+            <div id="L5" class="light"></div>
+            <div id="L6" class="light"></div>
         </div>
-        <p>系統訊息：</p>
+        <p style="font-size: 0.85em; color: #bdc3c7; margin-bottom: 8px;">系統訊息：</p>
         <div id="msg">等待數據傳輸...</div>
     </div>
 
@@ -36,7 +101,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-      
         const firebaseConfig = {
             apiKey: "AIzaSyC42NK-qtUvnnsjMAhm2CrDAXl1N-b_vAM",
             authDomain: "project-4077090510236768798.firebaseapp.com",
@@ -47,30 +111,22 @@
             appId: "1:300320154462:web:2e8f58d308fd183098a5cf"
         };
 
-        // 初始化
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 監聽解鎖層級
         db.ref('current_layer').on('value', (snapshot) => {
-            const layer = snapshot.val();
+            const layer = snapshot.val() || 0;
             document.getElementById('status').innerText = "驗證進度：第 " + layer + " 層";
-            
             for(let i = 1; i <= 6; i++) {
                 const el = document.getElementById('L' + i);
-                if(layer > 0 && i <= layer) {
-                    el.classList.add('active');
-                } else {
-                    el.classList.remove('active');
-                }
+                if(layer > 0 && i <= layer) el.classList.add('active');
+                else el.classList.remove('active');
             }
         });
 
-        // 監聽系統訊息
         db.ref('status_msg').on('value', (snapshot) => {
-            const rawMsg = snapshot.val();
-            const cleanMsg = rawMsg.replace(/\"/g, ""); 
-            document.getElementById('msg').innerText = cleanMsg;
+            const rawMsg = snapshot.val() || "";
+            document.getElementById('msg').innerText = rawMsg.toString().replace(/\"/g, ""); 
         });
     </script>
 </body>
