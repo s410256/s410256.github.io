@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>reveal-md</title>
+    <link rel="shortcut icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="./dist/reset.css" />
+    <link rel="stylesheet" href="./dist/reveal.css" />
+    <link rel="stylesheet" href="./dist/theme/night.css" id="theme" />
+    <link rel="stylesheet" href="./css/highlight/atom-one-dark.css" />
+
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-markdown data-separator="^---$" data-separator-vertical="^----$">
+          <textarea data-template>
+            
+
+
+<!-- reveal-md cpp_lecture.md --static site  -->
+
+# C++ 程式設計基礎
+### 從語言發展到基本輸出入
+
+> 課堂簡報 | 看見科學
+
+---
+
+## 大綱 Outline
+
+1. 程式語言的發展
+2. Source Code → 執行檔
+3. 前處理器 Preprocessor
+4. 基本架構
+5. 輸入輸出 I/O
+6. 變數與型態
+7. 運算式 Expression
+8. 述句 Statement
+
+---
+
+# Part 1
+## 程式語言的發展
+
+----
+
+## 三種語言層次
+
+```
+高階語言  →  C++, Python, Java ...
+              ↓ 編譯
+組合語言  →  add 2, 3, result
+              ↓ 組譯
+機器語言  →  01001011 10110100 ...
+```
+
+----
+
+## Machine Language 機器語言
+
+- 僅由 **0 和 1** 組成
+- 代表電路的高低電位
+- 電腦**唯一看得懂**的語言
+- 缺點：
+  - 可讀性極差
+  - 不同機器有不同指令集
+
+----
+
+## Assembly Language 組合語言
+
+用**助憶碼 mnemonic** 代替機器指令
+
+```assembly
+add 2, 3, result
+```
+
+- 建置「組譯器」負責轉換
+- 可在不同平台移植
+- 大幅簡化開發過程
+
+----
+
+## High-level Language 高階語言
+
+現在大多數語言都屬於高階語言：
+
+| 語言 | 特性 |
+|------|------|
+| C | 貼近硬體，效能高 |
+| C++ | 支援 OOP，較易理解 |
+| Python | 語法簡潔，開發快速 |
+| Java | 跨平台，企業應用 |
+
+----
+
+## C vs C++
+
+| | C | C++ |
+|---|---|---|
+| 層次 | 低階語言之間 | 高階語言 |
+| 難度 | 較生澀 | 較易理解 |
+| OOP | N | Y |
+| 關係 | 基礎 | 建立在 C 之上 |
+
+> C++ 可以直接使用 C 的 header！
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+## 思考題
+
+> C 語言比 C++ 更「接近硬體」，這代表什麼？  
+> 什麼情況下你會選擇用 C 而不是 C++？
+
+<br>
+
+
+
+---
+
+# Part 2
+## Source Code → 執行檔
+
+----
+
+## 四個步驟
+
+```
+Source Code (.cpp)
+      ↓  1. 預先處理 Preprocessing
+Preprocessed Code
+      ↓  2. 編譯 Compilation
+Assembly Code
+      ↓  3. 組譯 Assembly
+Object File (.o)
+      ↓  4. 連結 Linking
+Executable (.exe / .out)
+```
+
+----
+
+## 各步驟說明
+
+**1 預先處理**
+- 抓取 `#include` 的 header 內容
+- 展開 `#define` 的替換
+- 組合成單一檔案
+
+**2 編譯**
+- 語法檢查
+- 優化並轉為 Assembly
+
+**3 組譯**
+- Assembly → 機器碼 → Object File
+
+**4 連結**
+- 將 Object Files 合併，解析符號，產生執行檔
+
+----
+
+## 編譯指令
+
+```bash
+# 前往檔案目錄
+cd [address]
+
+# 編譯並執行（a.out 為預設輸出名）
+g++ name.cpp && ./a.out
+
+# 自訂輸出檔名
+g++ -o myprogram name.cpp
+```
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  小測驗
+
+**Q: 以下哪個步驟會進行「語法檢查」？**
+
+<br>
+
+A. 預先處理 Preprocessing  
+B. 編譯 Compilation 
+C. 組譯 Assembly  
+D. 連結 Linking  
+
+----
+
+*答案：`B. 編譯 Compilation `*
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  小測驗
+
+**Q: `g++ name.cpp` 在 Unix 系統預設產生哪個執行檔？**
+
+<br>
+
+> 填空：\_\_\_\_\_\_\_
+
+<br>
+
+----
+
+*答案：`a.out`*
+
+---
+
+# Part 3
+## 前處理器 Preprocessor
+
+----
+
+## 常用 Preprocessor 指令
+
+| 指令 | 用途 |
+|------|------|
+| `#include` | 引入 header 檔 |
+| `#define` | 定義常數或簡易 function |
+| `#undef` | 取消 `#define` |
+| `#if / #elif / #else` | 條件式編譯 |
+
+----
+
+## `#define` 用法
+
+```cpp
+// 定義常數
+#define PI 3.14
+
+// 定義簡易 function（注意：無型別定義！）
+#define multiply(a1, a2) (a1 * a2)
+```
+
+ `#define` 的 function 不嚴謹，沒有型別檢查
+
+----
+
+## `#include` 用法
+
+```cpp
+// 引入標準函式庫 header（用角括號）
+#include <iostream>
+#include <algorithm>
+
+// 引入自訂 header（用雙引號 + 路徑）
+#include "usr/lib/head.h"
+```
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  思考題
+
+> `#define multiply(a, b) (a * b)` 這樣定義有什麼潛在問題？  
+> 試想：`multiply(1+2, 3)` 會得到什麼結果？
+
+<br>
+
+*提示：preprocessor 只做文字替換！*
+
+----
+
+*答案：`multiply(1+2, 3) 會因為巨集單純文字替換而展開成 (1 + 2 * 3)，導致運算子優先級錯誤，最終得到結果 7（而非預期的 9）。`*
+
+---
+
+# Part 4
+## 基本 Source Code 架構
+
+----
+
+## Hello World
+
+
+<div style="position: relative; width: 100%; height: 100%; padding-bottom: 56.25%;">
+  <iframe  src="https://godbolt.org/e#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:2,endLineNumber:9,positionColumn:2,positionLineNumber:9,selectionStartColumn:2,selectionStartLineNumber:9,startColumn:2,startLineNumber:9),source:'%23include+%3Ciostream%3E%0Ausing+namespace+std%3B%0A%0Aint+main()%0A%7B%0A++++//+%E5%96%AE%E8%A1%8C%E8%A8%BB%E8%A7%A3%0A++++cout+%3C%3C+%22Hello,+World!!%22+%3C%3C+endl%3B%0A++++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:g161,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',overrides:!(),selection:(endColumn:12,endLineNumber:14,positionColumn:12,positionLineNumber:14,selectionStartColumn:12,selectionStartLineNumber:14,startColumn:12,startLineNumber:14),source:1),l:'5',n:'0',o:'+x86-64+gcc+16.1+(Editor+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
+  
+</div>
+
+----
+
+
+## 拆解架構
+
+**1 `#include <iostream>`**
+- 告訴前處理器引入 `iostream` header
+- 包含基本輸出入（`cout`, `cin`）
+
+**2 `using namespace std;`**
+- 使用標準命名空間
+- 省去每次寫 `std::cout` 的麻煩
+
+----
+
+**3 `int main()`**
+- 程式的主體，OS 呼叫的入口
+- `int` 代表回傳整數型態
+
+**4 `return 0;`**
+- 回傳給 OS，`0` 表示程式正常結束
+
+----
+
+## 註解 Comments
+
+```cpp
+// 單行註解：此行不會被編譯
+
+/* 多行註解
+ * 這裡的內容全部無效
+ * 通常加 * 對齊並標示
+ */
+```
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  程式碼猜輸出
+
+```cpp
+#include <iostream>
+using namespace std;
+int main() {
+    // cout << "A" << endl;
+    cout << "B" << endl;
+    /* cout << "C" << endl; */
+    cout << "D" << endl;
+    return 0;
+}
+```
+
+**輸出是什麼？**
+
+----
+
+*答案：`B（換行）D`*
+
+---
+
+# Part 5
+## 基本輸出入 I/O
+
+----
+
+## `cout` 輸出
+
+<div style="position: relative; width: 100%; height: 100%; padding-bottom: 60%;">
+<iframe  src="https://godbolt.org/e#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:14,endLineNumber:10,positionColumn:14,positionLineNumber:10,selectionStartColumn:14,selectionStartLineNumber:10,startColumn:14,startLineNumber:10),source:'%23include+%3Ciostream%3E%0Ausing+namespace+std%3B%0A%0Aint+main()%0A%7B%0A++++int+BMI%3D99999%3B%0A++++//+%E8%BC%B8%E5%87%BA%E5%AD%97%E4%B8%B2%0A++++cout+%3C%3C+%22Hello+World%22%3B%0A%0A++++//+%E4%B8%B2%E6%8E%A5%E5%A4%9A%E5%80%8B%E8%BC%B8%E5%87%BA%0A++++cout+%3C%3C+%22Hello%22+%3C%3C+%22+%22+%3C%3C+%22World%22%3B%0A%0A++++//+%E8%BC%B8%E5%87%BA%E8%AE%8A%E6%95%B8%0A++++cout+%3C%3C+%22Your+BMI+is+%22+%3C%3C+BMI%3B%0A%0A++++//+%E6%8F%9B%E8%A1%8C%E6%96%B9%E5%BC%8F%EF%BC%88%E5%85%A9%E7%A8%AE%EF%BC%89%0A++++cout+%3C%3C+%22Line+1%22+%3C%3C+endl%3B++//+%E6%8F%9B%E8%A1%8C+%2B+%E6%B8%85%E9%99%A4%E7%B7%A9%E5%AD%98%0A++++cout+%3C%3C+%22Line+2%22+%3C%3C+%22%5Cn%22%3B+//+%E5%83%85%E6%8F%9B%E8%A1%8C%0A++++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:34.29270698791717,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:mingw64_ucrt_gcc_1520,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',overrides:!(),selection:(endColumn:25,endLineNumber:4,positionColumn:25,positionLineNumber:4,selectionStartColumn:25,selectionStartLineNumber:4,startColumn:25,startLineNumber:4),source:1),l:'5',n:'0',o:'+MinGW+gcc+15.2.0+(Editor+%231)',t:'0')),k:37.22460254718948,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:executor,i:(argsPanelShown:'1',compilationPanelShown:'0',compiler:g161,compilerName:'',compilerOutShown:'0',execArgs:'',execStdin:'',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',source:1,stdinPanelShown:'1',wrap:'1'),l:'5',n:'0',o:'Executor+x86-64+gcc+16.1+(C%2B%2B,+Editor+%231)',t:'0')),k:28.48269046489337,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
+  
+</div>
+
+
+----
+
+## `cin` 輸入
+
+<div style="position: relative; width: 100%; height: 100%; padding-bottom: 60%;">
+<iframe width="800px" height="200px" src="https://godbolt.org/e#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:14,endLineNumber:15,positionColumn:14,positionLineNumber:15,selectionStartColumn:14,selectionStartLineNumber:15,startColumn:14,startLineNumber:15),source:'%23include+%3Ciostream%3E%0Ausing+namespace+std%3B%0A%0Aint+main()%0A%7B%0A++++int+age%3B%0A++++double+height%3B%0A%0A++++//+%E8%AE%80%E5%8F%96%E5%96%AE%E4%B8%80%E8%AE%8A%E6%95%B8%0A++++cin+%3E%3E+age%3B%0A++++cout%3C%3Cage%3C%3Cendl%3B%0A++++//+%E8%AE%80%E5%8F%96%E5%A4%9A%E5%80%8B%E8%AE%8A%E6%95%B8%EF%BC%88%E7%A9%BA%E7%99%BD%E6%88%96%E6%8F%9B%E8%A1%8C%E5%88%86%E9%9A%94%EF%BC%89%0A++++cin+%3E%3E+age+%3E%3E+height%3B%0A++++cout%3C%3Cage%3C%3Cendl%3C%3Cheight%3B%0A++++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:52.90500826151191,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:executor,i:(argsPanelShown:'1',compilationPanelShown:'0',compiler:g161,compilerName:'',compilerOutShown:'0',execArgs:___1,execStdin:'',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',overrides:!(),runtimeTools:!(),source:1,stdinPanelShown:'0',wrap:'1'),l:'5',n:'0',o:'Executor+x86-64+gcc+16.1+(C%2B%2B,+Editor+%231)',t:'0')),k:47.094991738488105,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
+  
+</div>
+
+>  記得先宣告變數再使用！
+
+----
+
+## `printf()` — C 風格輸出
+
+<div style="position: relative; width: 100%; height: 100%; padding-bottom: 60%;">
+<iframe width="800px" height="200px" src="https://godbolt.org/e#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:27,endLineNumber:7,positionColumn:27,positionLineNumber:7,selectionStartColumn:27,selectionStartLineNumber:7,startColumn:27,startLineNumber:7),source:'%23include+%3Ciostream%3E%0A%23include+%3Ccstdio%3E%0Ausing+namespace+std%3B%0A%0Aint+main()%0A%7B%0A++++int+year%3D2026,month%3D6%3B%0A++++printf(%22abc%22)%3B++++++++++++++//+%E8%BC%B8%E5%87%BA+abc%0A++++printf(%22%25d%22,+10)%3B+++++++++++//+%E8%BC%B8%E5%87%BA%E6%95%B4%E6%95%B8+10%0A++++printf(%22%25f%22,+0.1234)%3B+++++++//+%E8%BC%B8%E5%87%BA+0.123400%0A++++printf(%22%25.2f%22,+0.1234)%3B+++++//+%E8%BC%B8%E5%87%BA+0.12%0A++++printf(%22%25d%E5%B9%B4%25d%E6%9C%88%22,+year,+month)%3B%0A++++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:52.90500826151191,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:executor,i:(argsPanelShown:'1',compilationPanelShown:'0',compiler:g161,compilerName:'',compilerOutShown:'0',execArgs:___1,execStdin:'',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',overrides:!(),runtimeTools:!(),source:1,stdinPanelShown:'1',wrap:'1'),l:'5',n:'0',o:'Executor+x86-64+gcc+16.1+(C%2B%2B,+Editor+%231)',t:'0')),k:47.094991738488105,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
+  
+</div>
+
+----
+
+| 格式符 | 用途 |
+|--------|------|
+| `%d` | 整數 int |
+| `%f` | 浮點數 float |
+| `%.nf` | 輸出 n 位小數 |
+| `%s` | 字串 |
+
+----
+
+## 加速 C++ I/O
+
+```cpp
+// 需要速度時（如競程），加在 main() 開頭
+ios_base::sync_with_stdio(false);
+cin.tie(NULL);
+cout.tie(NULL);
+```
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  程式碼猜輸出
+
+```cpp
+#include <iostream>
+using namespace std;
+int main() {
+    cout << "Score: " << 100 - 40 << endl;
+    cout << "Pass: " << (60 > 59 ? "Yes" : "No") << endl;
+    return 0;
+}
+```
+
+**輸出是什麼？**
+
+----
+
+ *答案：* 
+*`Score: 60`* 
+*`Pass: Yes`*
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  小測驗
+
+**Q: `endl` 和 `"\n"` 的差別是？**
+
+<br>
+
+A. 沒有差別  
+B. `endl` 會額外清除緩存（flush）  
+C. `"\n"` 不能換行  
+D. `endl` 只能在 C++ 用  
+
+----
+
+*答案：`B. `endl` 會額外清除緩存（flush）  `*
+
+---
+
+
+# Part 6
+## 變數與資料型態
+
+----
+
+## 為什麼需要型態？
+
+> 電腦資源有限，需要依資料性質分配空間
+
+把變數想像成**不同大小的盒子**：
+- 盒子大小 = 記憶體空間（位元數）
+- 硬塞 = **overflow 溢位** 
+- 貼標籤 = 變數名稱（識別字）
+
+----
+
+## 整數型態
+
+| 型態 | 位元 | 範圍 |
+|------|------|------|
+| `short int` | 2 | -32768 ~ 32767 |
+| `int` | 4 | -2,147,483,648 ~ 2,147,483,647 |
+| `long int` | 4 | 同 int |
+| `long long` | 8 | ±9.2 × 10¹⁸ |
+| `unsigned int` | 4 | 0 ~ 4,294,967,295 |
+
+----
+
+## 浮點數與其他型態
+
+| 型態 | 位元 | 說明 |
+|------|------|------|
+| `float` | 4 | 單精度浮點數 |
+| `double` | 8 | 雙精度浮點數（常用） |
+| `char` | 1 | 字元，存 ASCII 碼 |
+| `bool` | 1 | `true` / `false` |
+
+----
+
+## 變數宣告
+
+```cpp
+// 只宣告，不賦值
+int a, b, c;
+
+// 宣告並賦值
+int x = 10;
+double pi = 3.14159;
+
+// 混合
+int a, b = 33, c;
+```
+
+----
+
+## 各型態範例
+
+```cpp
+bool flag = true;         // 布林值
+int count = 100;          // 整數
+long long big = 1234567890123LL;  // 大整數
+float f = 22.0f;          // 單精度浮點
+double d = 3.14159265;    // 雙精度浮點
+char c = 'A';             // 字元
+char newline = '\n';      // 跳脫字元
+```
+
+----
+
+## 跳脫字元 Escape Sequence
+
+| 跳脫序列 | 意義 |
+|----------|------|
+| `\n` | 換行 |
+| `\t` | Tab 跳格 |
+| `\a` | 警告音 |
+| `\0` | 字串結束字元 |
+| `\\` | 反斜線 `\` |
+| `\"` | 雙引號 `"` |
+
+----
+
+## 變數命名原則
+
+Y **好的命名**
+```cpp
+int exam_score;
+double total_price;
+bool is_valid;
+```
+
+N **不好的命名**
+```cpp
+int 1score;      // 數字開頭
+int exam score;  // 有空格
+int __value;     // 雙底線開頭（程式庫保留）
+```
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  小測驗
+
+**Q: 要儲存全班 50 人的成績（0-100），應用哪個型態最適合？**
+
+<br>
+
+A. `char`  
+B. `short int`  
+C. `long long`  
+D. `double`  
+
+<br>
+
+----
+
+*答案：`B. short int 範圍 -32768~32767 已足夠，且省空間`*
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  程式碼猜輸出
+
+```cpp
+#include <iostream>
+using namespace std;
+int main() {
+    char c = 'A';
+    cout << c << endl;
+    cout << c + 1 << endl;
+    cout << (char)(c + 1) << endl;
+    return 0;
+}
+```
+
+**三行輸出各是什麼？**
+
+----
+
+ 答案：  
+ `A`  
+ `66`（ASCII 碼 65+1）  
+ `B`（轉回 char）
+
+---
+
+# Part 7
+## 運算式 Expression
+
+----
+
+## 組成
+
+```
+運算式 = 運算元 (operand) + 運算子 (operator)
+```
+
+三種形式：
+```cpp
+operand1;                          // 單一運算元
+operand1 operator operand2;        // 二元
+condition ? expr1 : expr2;         // 條件運算
+```
+
+----
+
+## 算術運算子
+
+| 優先 | 運算子 | 功能 | 範例 |
+|------|--------|------|------|
+| 1 | `+` `-` | 正負號 | `-a` |
+| 2 | `*` `/` `%` | 乘除取餘 | `a * b` |
+| 3 | `+` `-` | 加減 | `a + b` |
+
+> 全數**左結合**（由左至右）
+
+----
+##  整數除法陷阱
+
+```cpp
+int a = 1, b = 3;
+cout << a / b;         // 輸出 0（整數除法捨去）
+
+float a = 1, b = 3;
+cout << a / b;         // 輸出 0.333333
+
+// 強制型別轉換
+int a = 1, b = 3;
+cout << (float)a / b;  // 輸出 0.333333
+```
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  程式碼猜輸出
+
+```cpp
+int a = 1, b = 3;
+cout << float(a/b) << endl;
+cout << (float)a/b << endl;
+```
+
+**兩行輸出一樣嗎？為什麼？**
+
+----
+
+ 答案：  
+ 第一行：`0`（先算 `1/3=0`，再轉 float）  
+ 第二行：`0.333333`（`a` 先轉 float，再除）
+
+----
+
+## 遞增遞減運算子
+
+| 寫法 | 行為 |
+|------|------|
+| `++a` | 先加 1，再使用值 |
+| `a++` | 先使用值，再加 1 |
+| `--a` | 先減 1，再使用值 |
+| `a--` | 先使用值，再減 1 |
+
+```cpp
+int b = 10;
+cout << 10 * (++b);   // 輸出 110（b先變11，再乘10）
+```
+
+----
+
+## 邏輯與關係運算子
+
+| 優先 | 運算子 | 說明 |
+|------|--------|------|
+| 1 | `!` | 邏輯 NOT |
+| 2 | `>` `<` `>=` `<=` | 大小比較 |
+| 3 | `==` `!=` | 相等/不等 |
+| 4 | `&&` | 邏輯 AND |
+| 5 | `\|\|` | 邏輯 OR |
+
+>  `=` 是指派；`==` 才是比較！
+
+----
+## Short-circuit Evaluation 短路運算
+
+```cpp
+// && ：左邊為 false → 右邊不執行
+false && someFunction();  // someFunction() 不被呼叫
+
+// || ：左邊為 true → 右邊不執行
+true || someFunction();   // someFunction() 不被呼叫
+```
+
+----
+
+## 複合指派運算子
+
+```cpp
+a += 1;    // 等同 a = a + 1
+b -= a;    // 等同 b = b - a
+c *= a;    // 等同 c = c * a
+d /= 1000; // 等同 d = d / 1000
+e %= 3;    // 等同 e = e % 3
+```
+
+----
+
+## 條件運算子（三元）
+
+```cpp
+// 語法
+condition ? expr_if_true : expr_if_false;
+
+// 範例
+int score = 60;
+cout << (score > 60 ? "pass" : "fail");
+// 輸出：fail
+```
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  思考題
+
+> 以下程式碼中，`someFunction()` 會被執行嗎？  
+> 說明你的理由。
+
+```cpp
+int x = 5;
+if (x > 3 || someFunction()) {
+    cout << "yes";
+}
+```
+
+----
+
+ 答案：**不會**。`x > 3` 為 true，  
+ `||` 短路，右邊不執行。
+
+---
+
+# Part 8
+## 述句 Statement
+
+----
+
+## 程式三大結構
+
+| 結構 | 說明 |
+|------|------|
+| **循序** | 由上到下依序執行 |
+| **選擇** | 依條件決定執行哪段 |
+| **重複** | 依條件決定執行幾次 |
+
+> 每種結構都只有**一個進入點**和**一個出口**
+
+----
+
+## `if` 述句
+
+```cpp
+if (condition1) {
+    statement1;
+}
+else if (condition2) {
+    statement2;
+}
+else {
+    statementN;
+}
+```
+
+>  條件範圍**小的放前面**，避免 bug！
+
+----
+
+## 巢狀 if — 閏年判斷
+
+<div style="position: relative; width: 100%; height: 100%; padding-bottom: 60%;">
+<iframe width="800px" height="200px" src="https://godbolt.org/e#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAMzwBtMA7AQwFtMQByARg9KtQYEAysib0QXACx8BBAKoBnTAAUAHpwAMvAFYTStJg1DIApACYAQuYukl9ZATwDKjdAGFUtAK4sGEjaSuADJ4DJgAcj4ARpjEIAAcpAAOqAqETgwe3r7%2ByanpAiFhkSwxcYl2mA4ZQgRMxARZPn5cAZXVArX1BEUR0bEJtnUNTTmtQ929JWUJAJS2qF7EyOwc5gDMocjeWADUJutuTgoExJisB9gmGgCCG1s7mPuHyCf4qJfXN15pRrvMbAUSSYK12bwOVluX1CBF2LCYoQgsy%2BJgA7BZdpivpisbccbs8FRdlAAJ7nYj7MwAVl2klmzwAIgcGbsNPS0ZCbvj8YTiRAyfVKTTWmzGczWez0djuTLeaTyULaRpRczxWzpTLNbs0F5YQc3PrdgKKfrDeYzCZsFSTBYAJw2ySWgBsJlt8RMNwAYpb7baXfFvVabfaLJIIJJlZbrfENCZ4kzsC7bdaLPFkWYLetOVr8ZhaEoNTn8Tq9YdDcbngbDpSLUG7Q6fa6mbarthff7AymQ2GRVHgw705ns5q0Uy8Zq80p9lLx0WS5XywrTdXzX366Hna73V7G36453%2B6GILvm9he0GY3GE0mU/FHRfY/HN8mbWnV1nC/jR4Xv7PdpOng5T8cXnZc3CNJcyxXDM127E9XVbdt91ghtsG9CwDXid02ybBD72jR9r1dW9LXQzD7Rgj8/1/O5UQZDh5loTgqV4PwOC0UhUE4A1LGsMFFmWQCzHWHhSAITQGPmABrEAqTMAA6W0NCpZV4jMJ0uCpLguFtLh9E4SRWIkzjOF4BQQACcT2IY0g4FgJBMFUKpdRIchKHqYAFGUQw8yEBBUAAdzY0S0BYJI6CYRwBG8sJaD8wK2I40LwvoOJgC4DTSGSuhYnCVhVl4bLUoAeV1eKguMxyqhuYhPJAAB9Rq9Kq5BanwNjeH4QQRDEdgpBkQRFBUdRrNIXQ9IMIwUGsax9DwKJzMgeZUCSKKGHMjheFQAA3WJiDwLBFqRUhiC8QQ8DYAAVVBPCO%2BYFAElY9DeUIYt8/yKu4XgAuIJgkk4HhGOYozRq4jhsCc5AXIpVR4idABaJ1JF2YBkGQXYMvkrhiR4qxLFIXZcEIEhKRE2ZeCsrRZmkkBJFReSNFtSRbV01F1jvLDWipfSOEM0hEq20zbAssSJOpnmzBBjiwYpsX5l24g0mcSQgA" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
+  
+</div>
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  小測驗
+
+**Q: `year = 1900`，以上程式碼輸出什麼？**
+
+<br>
+
+A. 1900年是閏年(400倍數)  
+B. 1900年非閏年(100年) 
+C. 1900年是閏年(非100倍數4倍數)  
+D. 1900年非閏年（非4倍數）  
+
+<br>
+
+*（1900 % 4 == 0, 1900 % 100 == 0, 但 1900 % 400 ≠ 0）*
+
+----
+
+*答案：`B. 1900年非閏年(100年) `*
+
+----
+
+<!-- .slide: data-background="#1a1a2e" -->
+
+##  程式碼猜輸出
+
+```cpp
+int a = 5, b = 10;
+if (a > 3)
+    if (b > 8)
+        cout << "A" << endl;
+    else
+        cout << "B" << endl;
+else
+    cout << "C" << endl;
+```
+
+**輸出是什麼？**
+
+----
+
+ 答案：`A`  
+ `a > 3` 為 true，進入內層 if，`b > 8` 為 true，輸出 A
+
+---
+
+## 總結 Summary
+
+| 主題 | 重點 |
+|------|------|
+| 語言層次 | 機器語言 → 組合語言 → 高階語言 |
+| 編譯流程 | 預處理 → 編譯 → 組譯 → 連結 |
+| 前處理器 | `#include`, `#define`, `#undef` |
+| 資料型態 | int, double, char, bool... |
+| 運算子 | 算術、邏輯、關係、指派 |
+| 控制流 | if / else if / else |
+
+
+----
+
+<!-- .slide: data-background="#0d1117" -->
+
+# 謝謝！
+### 有問題請問隊輔　
+### 隊輔不會再問教學
+
+
+
+          </textarea>
+        </section>
+      </div>
+    </div>
+
+    <script src="./dist/reveal.js"></script>
+
+    <script src="./mermaid/dist/mermaid.min.js"></script>
+
+    <script src="./plugin/markdown/markdown.js"></script>
+    <script src="./plugin/highlight/highlight.js"></script>
+    <script src="./plugin/zoom/zoom.js"></script>
+    <script src="./plugin/notes/notes.js"></script>
+    <script src="./plugin/math/math.js"></script>
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        slideNumber: true,
+        highlight: {
+          highlightOnLoad: false
+        },
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath
+        ]
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {"_":["cpp_lecture.md"],"static":"site"}, queryOptions);
+    </script>
+
+
+    <script>
+      Reveal.initialize(options);
+      Reveal.addEventListener('ready', function (event) {
+        const blocks = Reveal.getRevealElement().querySelectorAll('pre code:not(.mermaid)');
+        const hlp = Reveal.getPlugin('highlight');
+        blocks.forEach(hlp.highlightBlock);
+      });
+    </script>
+
+    <script>
+      const mermaidOptions = extend({ startOnLoad: false }, {});
+      mermaid.startOnLoad = false;
+      mermaid.initialize(mermaidOptions);
+      const cb = function (event) {
+        mermaid.init(mermaidOptions, '.stack.present > .present pre code.mermaid');
+        mermaid.init(mermaidOptions, '.slides > .present:not(.stack) pre code.mermaid');
+      }
+      Reveal.addEventListener('ready', cb);
+      Reveal.addEventListener('slidetransitionend', cb);
+    </script>
+  </body>
+</html>
