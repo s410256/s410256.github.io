@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-    <title>看見科學-資訊課程簡報</title>
+    <title>reveal-md</title>
     <link rel="shortcut icon" href="./favicon.ico" />
     <link rel="stylesheet" href="./dist/reset.css" />
     <link rel="stylesheet" href="./dist/reveal.css" />
@@ -19,10 +19,13 @@
           <textarea data-template>
             
 
+
+<!-- reveal-md cpp_lecture.md --static site  -->
+
 # C++ 程式設計基礎
 ### 從語言發展到基本輸出入
 
-> 課堂講義 | 看見科學
+> 課堂簡報 | 看見科學
 
 ---
 
@@ -184,9 +187,13 @@ g++ -o myprogram name.cpp
 <br>
 
 A. 預先處理 Preprocessing  
-B. 編譯 Compilation Y
+B. 編譯 Compilation 
 C. 組譯 Assembly  
 D. 連結 Linking  
+
+----
+
+*答案：`B. 編譯 Compilation `*
 
 ----
 
@@ -201,6 +208,8 @@ D. 連結 Linking
 > 填空：\_\_\_\_\_\_\_
 
 <br>
+
+----
 
 *答案：`a.out`*
 
@@ -260,6 +269,10 @@ D. 連結 Linking
 
 *提示：preprocessor 只做文字替換！*
 
+----
+
+*答案：`multiply(1+2, 3) 會因為巨集單純文字替換而展開成 (1 + 2 * 3)，導致運算子優先級錯誤，最終得到結果 7（而非預期的 9）。`*
+
 ---
 
 # Part 4
@@ -269,19 +282,14 @@ D. 連結 Linking
 
 ## Hello World
 
-```cpp
-#include <iostream>
-using namespace std;
 
-int main()
-{
-    // 單行註解
-    cout << "Hello, World!" << endl;
-    return 0;
-}
-```
+<div style="position: relative; width: 100%; height: 100%; padding-bottom: 56.25%;">
+  <iframe  src="https://godbolt.org/e#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:2,endLineNumber:9,positionColumn:2,positionLineNumber:9,selectionStartColumn:2,selectionStartLineNumber:9,startColumn:2,startLineNumber:9),source:'%23include+%3Ciostream%3E%0Ausing+namespace+std%3B%0A%0Aint+main()%0A%7B%0A++++//+%E5%96%AE%E8%A1%8C%E8%A8%BB%E8%A7%A3%0A++++cout+%3C%3C+%22Hello,+World!!%22+%3C%3C+endl%3B%0A++++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:g161,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',overrides:!(),selection:(endColumn:12,endLineNumber:14,positionColumn:12,positionLineNumber:14,selectionStartColumn:12,selectionStartLineNumber:14,startColumn:12,startLineNumber:14),source:1),l:'5',n:'0',o:'+x86-64+gcc+16.1+(Editor+%231)',t:'0')),k:50,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
+  
+</div>
 
 ----
+
 
 ## 拆解架構
 
@@ -333,7 +341,9 @@ int main() {
 
 **輸出是什麼？**
 
-> 答案：B（換行）D
+----
+
+*答案：`B（換行）D`*
 
 ---
 
@@ -344,35 +354,20 @@ int main() {
 
 ## `cout` 輸出
 
-```cpp
-// 輸出字串
-cout << "Hello World";
+<div style="position: relative; width: 100%; height: 100%; padding-bottom: 60%;">
+<iframe  src="https://godbolt.org/e#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:14,endLineNumber:10,positionColumn:14,positionLineNumber:10,selectionStartColumn:14,selectionStartLineNumber:10,startColumn:14,startLineNumber:10),source:'%23include+%3Ciostream%3E%0Ausing+namespace+std%3B%0A%0Aint+main()%0A%7B%0A++++int+BMI%3D99999%3B%0A++++//+%E8%BC%B8%E5%87%BA%E5%AD%97%E4%B8%B2%0A++++cout+%3C%3C+%22Hello+World%22%3B%0A%0A++++//+%E4%B8%B2%E6%8E%A5%E5%A4%9A%E5%80%8B%E8%BC%B8%E5%87%BA%0A++++cout+%3C%3C+%22Hello%22+%3C%3C+%22+%22+%3C%3C+%22World%22%3B%0A%0A++++//+%E8%BC%B8%E5%87%BA%E8%AE%8A%E6%95%B8%0A++++cout+%3C%3C+%22Your+BMI+is+%22+%3C%3C+BMI%3B%0A%0A++++//+%E6%8F%9B%E8%A1%8C%E6%96%B9%E5%BC%8F%EF%BC%88%E5%85%A9%E7%A8%AE%EF%BC%89%0A++++cout+%3C%3C+%22Line+1%22+%3C%3C+endl%3B++//+%E6%8F%9B%E8%A1%8C+%2B+%E6%B8%85%E9%99%A4%E7%B7%A9%E5%AD%98%0A++++cout+%3C%3C+%22Line+2%22+%3C%3C+%22%5Cn%22%3B+//+%E5%83%85%E6%8F%9B%E8%A1%8C%0A++++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:34.29270698791717,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:mingw64_ucrt_gcc_1520,filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',debugCalls:'1',demangle:'0',directives:'0',execute:'0',intel:'0',libraryCode:'0',trim:'1',verboseDemangling:'0'),flagsViewOpen:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',overrides:!(),selection:(endColumn:25,endLineNumber:4,positionColumn:25,positionLineNumber:4,selectionStartColumn:25,selectionStartLineNumber:4,startColumn:25,startLineNumber:4),source:1),l:'5',n:'0',o:'+MinGW+gcc+15.2.0+(Editor+%231)',t:'0')),k:37.22460254718948,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:executor,i:(argsPanelShown:'1',compilationPanelShown:'0',compiler:g161,compilerName:'',compilerOutShown:'0',execArgs:'',execStdin:'',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',source:1,stdinPanelShown:'1',wrap:'1'),l:'5',n:'0',o:'Executor+x86-64+gcc+16.1+(C%2B%2B,+Editor+%231)',t:'0')),k:28.48269046489337,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
+  
+</div>
 
-// 串接多個輸出
-cout << "Hello" << " " << "World";
-
-// 輸出變數
-cout << "Your BMI is " << BMI;
-
-// 換行方式（兩種）
-cout << "Line 1" << endl;  // 換行 + 清除緩存
-cout << "Line 2" << "\n"; // 僅換行
-```
 
 ----
 
 ## `cin` 輸入
 
-```cpp
-int age;
-double height;
-
-// 讀取單一變數
-cin >> age;
-
-// 讀取多個變數（空白或換行分隔）
-cin >> age >> height;
-```
+<div style="position: relative; width: 100%; height: 100%; padding-bottom: 60%;">
+<iframe width="800px" height="200px" src="https://godbolt.org/e#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:14,endLineNumber:15,positionColumn:14,positionLineNumber:15,selectionStartColumn:14,selectionStartLineNumber:15,startColumn:14,startLineNumber:15),source:'%23include+%3Ciostream%3E%0Ausing+namespace+std%3B%0A%0Aint+main()%0A%7B%0A++++int+age%3B%0A++++double+height%3B%0A%0A++++//+%E8%AE%80%E5%8F%96%E5%96%AE%E4%B8%80%E8%AE%8A%E6%95%B8%0A++++cin+%3E%3E+age%3B%0A++++cout%3C%3Cage%3C%3Cendl%3B%0A++++//+%E8%AE%80%E5%8F%96%E5%A4%9A%E5%80%8B%E8%AE%8A%E6%95%B8%EF%BC%88%E7%A9%BA%E7%99%BD%E6%88%96%E6%8F%9B%E8%A1%8C%E5%88%86%E9%9A%94%EF%BC%89%0A++++cin+%3E%3E+age+%3E%3E+height%3B%0A++++cout%3C%3Cage%3C%3Cendl%3C%3Cheight%3B%0A++++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:52.90500826151191,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:executor,i:(argsPanelShown:'1',compilationPanelShown:'0',compiler:g161,compilerName:'',compilerOutShown:'0',execArgs:___1,execStdin:'',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',overrides:!(),runtimeTools:!(),source:1,stdinPanelShown:'0',wrap:'1'),l:'5',n:'0',o:'Executor+x86-64+gcc+16.1+(C%2B%2B,+Editor+%231)',t:'0')),k:47.094991738488105,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
+  
+</div>
 
 >  記得先宣告變數再使用！
 
@@ -380,15 +375,12 @@ cin >> age >> height;
 
 ## `printf()` — C 風格輸出
 
-```cpp
-#include <cstdio>
+<div style="position: relative; width: 100%; height: 100%; padding-bottom: 60%;">
+<iframe width="800px" height="200px" src="https://godbolt.org/e#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,selection:(endColumn:27,endLineNumber:7,positionColumn:27,positionLineNumber:7,selectionStartColumn:27,selectionStartLineNumber:7,startColumn:27,startLineNumber:7),source:'%23include+%3Ciostream%3E%0A%23include+%3Ccstdio%3E%0Ausing+namespace+std%3B%0A%0Aint+main()%0A%7B%0A++++int+year%3D2026,month%3D6%3B%0A++++printf(%22abc%22)%3B++++++++++++++//+%E8%BC%B8%E5%87%BA+abc%0A++++printf(%22%25d%22,+10)%3B+++++++++++//+%E8%BC%B8%E5%87%BA%E6%95%B4%E6%95%B8+10%0A++++printf(%22%25f%22,+0.1234)%3B+++++++//+%E8%BC%B8%E5%87%BA+0.123400%0A++++printf(%22%25.2f%22,+0.1234)%3B+++++//+%E8%BC%B8%E5%87%BA+0.12%0A++++printf(%22%25d%E5%B9%B4%25d%E6%9C%88%22,+year,+month)%3B%0A++++return+0%3B%0A%7D'),l:'5',n:'0',o:'C%2B%2B+source+%231',t:'0')),k:52.90500826151191,l:'4',n:'0',o:'',s:0,t:'0'),(g:!((h:executor,i:(argsPanelShown:'1',compilationPanelShown:'0',compiler:g161,compilerName:'',compilerOutShown:'0',execArgs:___1,execStdin:'',fontScale:14,fontUsePx:'0',j:1,lang:c%2B%2B,libs:!(),options:'',overrides:!(),runtimeTools:!(),source:1,stdinPanelShown:'1',wrap:'1'),l:'5',n:'0',o:'Executor+x86-64+gcc+16.1+(C%2B%2B,+Editor+%231)',t:'0')),k:47.094991738488105,l:'4',n:'0',o:'',s:0,t:'0')),l:'2',n:'0',o:'',t:'0')),version:4"style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
+  
+</div>
 
-printf("abc");              // 輸出 abc
-printf("%d", 10);           // 輸出整數 10
-printf("%f", 0.1234);       // 輸出 0.123400
-printf("%.2f", 0.1234);     // 輸出 0.12
-printf("%d年%d月", year, month);
-```
+----
 
 | 格式符 | 用途 |
 |--------|------|
@@ -426,9 +418,11 @@ int main() {
 
 **輸出是什麼？**
 
-> 答案：  
-> `Score: 60`  
-> `Pass: Yes`
+----
+
+ *答案：* 
+*`Score: 60`* 
+*`Pass: Yes`*
 
 ----
 
@@ -445,7 +439,12 @@ B. `endl` 會額外清除緩存（flush）
 C. `"\n"` 不能換行  
 D. `endl` 只能在 C++ 用  
 
+----
+
+*答案：`B. `endl` 會額外清除緩存（flush）  `*
+
 ---
+
 
 # Part 6
 ## 變數與資料型態
@@ -556,13 +555,15 @@ int __value;     // 雙底線開頭（程式庫保留）
 <br>
 
 A. `char`  
-B. `short int` Y  
+B. `short int`  
 C. `long long`  
 D. `double`  
 
 <br>
 
-*（`short int` 範圍 -32768~32767 已足夠，且省空間）*
+----
+
+*答案：`B. short int 範圍 -32768~32767 已足夠，且省空間`*
 
 ----
 
@@ -584,10 +585,12 @@ int main() {
 
 **三行輸出各是什麼？**
 
-> 答案：  
-> `A`  
-> `66`（ASCII 碼 65+1）  
-> `B`（轉回 char）
+----
+
+ 答案：  
+ `A`  
+ `66`（ASCII 碼 65+1）  
+ `B`（轉回 char）
 
 ---
 
@@ -650,9 +653,11 @@ cout << (float)a/b << endl;
 
 **兩行輸出一樣嗎？為什麼？**
 
-> 答案：  
-> 第一行：`0`（先算 `1/3=0`，再轉 float）  
-> 第二行：`0.333333`（`a` 先轉 float，再除）
+----
+
+ 答案：  
+ 第一行：`0`（先算 `1/3=0`，再轉 float）  
+ 第二行：`0.333333`（`a` 先轉 float，再除）
 
 ----
 
@@ -737,8 +742,10 @@ if (x > 3 || someFunction()) {
 }
 ```
 
-> 答案：**不會**。`x > 3` 為 true，  
-> `||` 短路，右邊不執行。
+----
+
+ 答案：**不會**。`x > 3` 為 true，  
+ `||` 短路，右邊不執行。
 
 ---
 
@@ -779,22 +786,10 @@ else {
 
 ## 巢狀 if — 閏年判斷
 
-```cpp
-if ((year % 4) == 0) {
-    if ((year % 100) == 0) {
-        if ((year % 400) == 0)
-            cout << year << "年是閏年(400倍數)";
-        else
-            cout << year << "年非閏年(100年)";
-    }
-    else {
-        cout << year << "年是閏年(非100倍數4倍數)";
-    }
-}
-else {
-    cout << year << "年非閏年（非4倍數）";
-}
-```
+<div style="position: relative; width: 100%; height: 100%; padding-bottom: 60%;">
+<iframe width="800px" height="200px" src="https://godbolt.org/e#z:OYLghAFBqd5QCxAYwPYBMCmBRdBLAF1QCcAaPECAMzwBtMA7AQwFtMQByARg9KtQYEAysib0QXACx8BBAKoBnTAAUAHpwAMvAFYTStJg1DIApACYAQuYukl9ZATwDKjdAGFUtAK4sGEjaSuADJ4DJgAcj4ARpjEIAAcpAAOqAqETgwe3r7%2ByanpAiFhkSwxcYl2mA4ZQgRMxARZPn5cAZXVArX1BEUR0bEJtnUNTTmtQ929JWUJAJS2qF7EyOwc5gDMocjeWADUJutuTgoExJisB9gmGgCCG1s7mPuHyCf4qJfXN15pRrvMbAUSSYK12bwOVluX1CBF2LCYoQgsy%2BJgA7BZdpivpisbccbs8FRdlAAJ7nYj7MwAVl2klmzwAIgcGbsNPS0ZCbvj8YTiRAyfVKTTWmzGczWez0djuTLeaTyULaRpRczxWzpTLNbs0F5YQc3PrdgKKfrDeYzCZsFSTBYAJw2ySWgBsJlt8RMNwAYpb7baXfFvVabfaLJIIJJlZbrfENCZ4kzsC7bdaLPFkWYLetOVr8ZhaEoNTn8Tq9YdDcbngbDpSLUG7Q6fa6mbarthff7AymQ2GRVHgw705ns5q0Uy8Zq80p9lLx0WS5XywrTdXzX366Hna73V7G36453%2B6GILvm9he0GY3GE0mU/FHRfY/HN8mbWnV1nC/jR4Xv7PdpOng5T8cXnZc3CNJcyxXDM127E9XVbdt91ghtsG9CwDXid02ybBD72jR9r1dW9LXQzD7Rgj8/1/O5UQZDh5loTgqV4PwOC0UhUE4A1LGsMFFmWQCzHWHhSAITQGPmABrEAqTMAA6W0NCpZV4jMJ0uCpLguFtLh9E4SRWIkzjOF4BQQACcT2IY0g4FgJBMFUKpdRIchKHqYAFGUQw8yEBBUAAdzY0S0BYJI6CYRwBG8sJaD8wK2I40LwvoOJgC4DTSGSuhYnCVhVl4bLUoAeV1eKguMxyqhuYhPJAAB9Rq9Kq5BanwNjeH4QQRDEdgpBkQRFBUdRrNIXQ9IMIwUGsax9DwKJzMgeZUCSKKGHMjheFQAA3WJiDwLBFqRUhiC8QQ8DYAAVVBPCO%2BYFAElY9DeUIYt8/yKu4XgAuIJgkk4HhGOYozRq4jhsCc5AXIpVR4idABaJ1JF2YBkGQXYMvkrhiR4qxLFIXZcEIEhKRE2ZeCsrRZmkkBJFReSNFtSRbV01F1jvLDWipfSOEM0hEq20zbAssSJOpnmzBBjiwYpsX5l24g0mcSQgA" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;"></iframe>
+  
+</div>
 
 ----
 
@@ -807,13 +802,17 @@ else {
 <br>
 
 A. 1900年是閏年(400倍數)  
-B. 1900年非閏年(100年) Y  
+B. 1900年非閏年(100年) 
 C. 1900年是閏年(非100倍數4倍數)  
 D. 1900年非閏年（非4倍數）  
 
 <br>
 
 *（1900 % 4 == 0, 1900 % 100 == 0, 但 1900 % 400 ≠ 0）*
+
+----
+
+*答案：`B. 1900年非閏年(100年) `*
 
 ----
 
@@ -834,8 +833,10 @@ else
 
 **輸出是什麼？**
 
-> 答案：`A`  
-> `a > 3` 為 true，進入內層 if，`b > 8` 為 true，輸出 A
+----
+
+ 答案：`A`  
+ `a > 3` 為 true，進入內層 if，`b > 8` 為 true，輸出 A
 
 ---
 
@@ -858,6 +859,8 @@ else
 # 謝謝！
 ### 有問題請問隊輔　
 ### 隊輔不會再問教學
+
+
 
           </textarea>
         </section>
