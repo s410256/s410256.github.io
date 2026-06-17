@@ -1,0 +1,12 @@
+@charset "UTF-8";
+.center{
+    text-align: center;
+    font-weight: bold;
+    transition: all 0.5s ease 0.3s;
+}
+.center:hover{
+    text-align: center;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(0, 0, 255, 0.5);
+    
+}
