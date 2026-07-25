@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>2D 瑪利歐賽車</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #2c3e50;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        h1 {
+            margin: 10px 0;
+            text-shadow: 2px 2px 4px #000;
+        }
+        #gameUI {
+            display: flex;
+            justify-content: space-between;
+            width: 800px;
+            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        canvas {
+            background-color: #228B22; /* 草地背景 */
+            border: 5px solid #bdc3c7;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+        .instructions {
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 8px;
+        }
+        .highlight { color: #f1c40f; }
+    </style>
+</head>
+<body>
+
+    <h1>🍄 2D 瑪利歐賽車 🏎️</h1>
+    <div id="gameUI">
+        <div id="lapDisplay">圈數: 0 / 3</div>
+        <div id="speedDisplay">時速: 0 km/h</div>
+    </div>
+    
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <div class="instructions">
+        🕹️ <b>控制方式：</b> 使用 <span class="highlight">方向鍵 (⬆️⬇️⬅️➡️)</span> 來加速、煞車與轉向。<br>
+        ⚠️ <b>規則：</b> 避開香蕉皮 (🍌)，吃到蘑菇 (🍄) 可以獲得短暫衝刺！開到草地上會大幅減速喔。
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const lapDisplay = document.getElementById('lapDisplay');
+        const speedDisplay = document.getElementById('speedDisplay');
+
+        // 鍵盤狀態
+        const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+        window.addEventListener('keydown', (e) => { if(keys.hasOwnProperty(e.code)) keys[e.code] = true; });
+        window.addEventListener('keyup', (e) => { if(keys.hasOwnProperty(e.code)) keys[e.code] = false; });
+
+        // 賽車屬性
+        const kart = {
+            x: 400,
+            y: 100, // 起點位置
+            angle: 0, // 面向右邊
+            speed: 0,
+            maxSpeed: 6,
+            accel: 0.2,
+            friction: 0.96, // 柏油路摩擦力
+            turnSpeed: 0.06,
+            boostTimer: 0,
+            spinTimer: 0,
+            checkpoints: { cp1: false, cp2: false, cp3: false },
+            laps: 0,
+            maxLaps: 3
+        };
+
+        // 道具陣列
+        let items = [];
+        
+        // 賽道橢圓參數
+        const trackCenter = { x: 400, y: 300 };
+        const trackOuter = { rx: 350, ry: 250 };
+        const trackInner = { rx: 180, ry: 120 };
+
+        // 產生道具
+        function spawnItems() {
+            items = [];
+            for(let i=0; i<15; i++) {
+                // 隨機角度與半徑，確保產生在賽道上
+                let angle = Math.random() * Math.PI * 2;
+                let radiusP = 0.2 + Math.random() * 0.6; // 離內圈和外圈的比例
+                let rx = trackInner.rx + (trackOuter.rx - trackInner.rx) * radiusP;
+                let ry = trackInner.ry + (trackOuter.ry - trackInner.ry) * radiusP;
+                
+                items.push({
+                    x: trackCenter.x + Math.cos(angle) * rx,
+                    y: trackCenter.y + Math.sin(angle) * ry,
+                    type: Math.random() > 0.3 ? 'banana' : 'mushroom',
+                    active: true
+                });
+            }
+        }
+        spawnItems();
+
+        // 判斷是否在草地上 (數學橢圓公式)
+        function isOffRoad(x, y) {
+            let dx = x - trackCenter.x;
+            let dy = y - trackCenter.y;
+            
+            // 外圈檢查
+            let outerCheck = (dx * dx) / (trackOuter.rx * trackOuter.rx) + (dy * dy) / (trackOuter.ry * trackOuter.ry);
+            // 內圈檢查
+            let innerCheck = (dx * dx) / (trackInner.rx * trackInner.rx) + (dy * dy) / (trackInner.ry * trackInner.ry);
+            
+            if (outerCheck > 1) return true; // 超出外圈
+            if (innerCheck < 1) return true; // 掉進內圈
+            return false; // 在賽道上
+        }
+
+        // 遊戲主迴圈
+        function update() {
+            if (kart.laps >= kart.maxLaps) {
+                draw();
+                ctx.fillStyle = "rgba(0,0,0,0.7)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#f1c40f";
+                ctx.font = "bold 60px sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText("🏁 恭喜完賽！ 🏁", canvas.width/2, canvas.height/2);
+                return; // 遊戲結束
+            }
+
+            // 處理打滑狀態
+            if (kart.spinTimer > 0) {
+                kart.spinTimer--;
+                kart.angle += 0.3; // 快速旋轉
+                kart.speed *= 0.9;
+            } else {
+                // 正常控制
+                let currentMaxSpeed = kart.maxSpeed;
+                let currentFriction = kart.friction;
+
+                // 蘑菇加速狀態
+                if (kart.boostTimer > 0) {
+                    currentMaxSpeed = 10;
+                    kart.boostTimer--;
+                }
+
+                // 草地減速
+                if (isOffRoad(kart.x, kart.y)) {
+                    currentMaxSpeed = 2; // 草地上最快只能開 2
+                    currentFriction = 0.85; // 阻力變大
+                }
+
+                // 加速與倒車
+                if (keys.ArrowUp) kart.speed += kart.accel;
+                if (keys.ArrowDown) kart.speed -= kart.accel;
+
+                // 轉向 (只有在有速度時才能轉彎)
+                if (Math.abs(kart.speed) > 0.5) {
+                    let dir = kart.speed > 0 ? 1 : -1;
+                    if (keys.ArrowLeft) kart.angle -= kart.turnSpeed * dir;
+                    if (keys.ArrowRight) kart.angle += kart.turnSpeed * dir;
+                }
+
+                // 限制最高速度並套用摩擦力
+                kart.speed = Math.min(Math.max(kart.speed, -currentMaxSpeed / 2), currentMaxSpeed);
+                kart.speed *= currentFriction;
+
+                // 更新位置
+                kart.x += Math.cos(kart.angle) * kart.speed;
+                kart.y += Math.sin(kart.angle) * kart.speed;
+            }
+
+            // 邊界限制避免跑出畫面
+            kart.x = Math.max(20, Math.min(canvas.width - 20, kart.x));
+            kart.y = Math.max(20, Math.min(canvas.height - 20, kart.y));
+
+            // 道具碰撞偵測
+            items.forEach(item => {
+                if (!item.active) return;
+                let dist = Math.hypot(kart.x - item.x, kart.y - item.y);
+                if (dist < 25) { // 撞到道具
+                    item.active = false;
+                    if (item.type === 'banana') {
+                        kart.spinTimer = 40; // 打滑 40 幀
+                    } else if (item.type === 'mushroom') {
+                        kart.boostTimer = 60; // 加速 60 幀
+                        kart.speed = 10; // 瞬間提速
+                    }
+                }
+            });
+
+            // 圈數邏輯 (利用檢查點避免原地刷圈數)
+            if (kart.x > 600) kart.checkpoints.cp1 = true; // 右側
+            if (kart.y > 400) kart.checkpoints.cp2 = true; // 下側
+            if (kart.x < 200) kart.checkpoints.cp3 = true; // 左側
+            
+            // 通過終點線 (上方中間)
+            if (kart.x > 380 && kart.x < 420 && kart.y < 250) {
+                if (kart.checkpoints.cp1 && kart.checkpoints.cp2 && kart.checkpoints.cp3) {
+                    kart.laps++;
+                    kart.checkpoints = { cp1: false, cp2: false, cp3: false };
+                    // 每圈重生道具
+                    if(kart.laps < kart.maxLaps) spawnItems(); 
+                }
+            }
+
+            // 更新 UI
+            lapDisplay.innerText = `圈數: ${kart.laps} / ${kart.maxLaps}`;
+            speedDisplay.innerText = `時速: ${Math.round(Math.abs(kart.speed) * 20)} km/h`;
+
+            draw();
+            requestAnimationFrame(update);
+        }
+
+        // 渲染畫面
+        function draw() {
+            // 清除畫面 (預設綠色背景已經由 canvas CSS 提供，但我們還是畫一下)
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 畫柏油賽道
+            ctx.fillStyle = '#555555';
+            ctx.beginPath();
+            ctx.ellipse(trackCenter.x, trackCenter.y, trackOuter.rx, trackOuter.ry, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 畫內圈草地
+            ctx.fillStyle = '#228B22';
+            ctx.beginPath();
+            ctx.ellipse(trackCenter.x, trackCenter.y, trackInner.rx, trackInner.ry, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 畫終點線 (棋盤格)
+            ctx.fillStyle = 'white';
+            const finishLineY = trackCenter.y - trackOuter.ry;
+            const finishLineHeight = trackOuter.ry - trackInner.ry;
+            for(let i = 0; i < finishLineHeight; i += 10) {
+                for(let j = 0; j < 2; j++) {
+                    if((i/10 + j) % 2 === 0) {
+                        ctx.fillRect(390 + j*10, finishLineY + i, 10, 10);
+                    }
+                }
+            }
+
+            // 畫道具
+            ctx.font = "24px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            items.forEach(item => {
+                if (item.active) {
+                    ctx.fillText(item.type === 'banana' ? '🍌' : '🍄', item.x, item.y);
+                }
+            });
+
+            // 畫賽車 (Emoji 🏎️)
+            ctx.save();
+            ctx.translate(kart.x, kart.y);
+            ctx.rotate(kart.angle);
+            
+            // 繪製排氣管火焰 (加速時)
+            if (kart.boostTimer > 0) {
+                ctx.fillText('🔥', -30, 0);
+            }
+
+            ctx.font = "30px Arial";
+            ctx.fillText('🏎️', 0, 0);
+            ctx.restore();
+        }
+
+        // 啟動遊戲
+        update();
+    </script>
+</body>
+</html>
