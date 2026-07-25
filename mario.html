@@ -262,7 +262,7 @@
             ctx.textBaseline = "middle";
             items.forEach(item => {
                 if (item.active) {
-                    ctx.fillText(item.type === 'banana' ? '🍌' : '🍄', item.x, item.y);
+                    ctx.fillText(item.type === 'banana' ? '香蕉' : '蘑菇', item.x, item.y);
                 }
             });
 
@@ -273,11 +273,11 @@
             
             // 繪製排氣管火焰 (加速時)
             if (kart.boostTimer > 0) {
-                ctx.fillText('🔥🔥🔥🔥', -100, 0);
+                ctx.fillText('噴射火焰', -100, 0);
             }
 
             ctx.font = "30px Arial";
-            ctx.fillText('-🏎️-', 0, 0);
+            ctx.fillText('車尾-駕駛艙-車頭', 0, 0);
             ctx.restore();
         }
 
