@@ -1,11 +1,209 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>校園最新公告看板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <a href="https://drive.google.com/file/d/1rG4K9Xn0tvsCPlVVp8iL_vaaoyG9jFlL/view?usp=sharing" target="_blank">Download File</a>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- 頂部控制面板 -->
+        <header class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 border-b pb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">校園公告看板</h1>
+                    <p class="text-xs text-gray-500 mt-1" id="status-text">資料讀取中...</p>
+                </div>
+            </div>
+
+            <!-- 搜尋與多重過濾選單 -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <input type="text" id="search-input" placeholder="搜尋標題或內文關鍵字..." 
+                    class="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                
+                <select id="category-select" class="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    <option value="ALL">全部分類 (大看板)</option>
+                    <option value="重要公告">重要公告</option>
+                    <option value="榮譽榜">榮譽榜</option>
+                    <option value="不分類">不分類</option>
+                    <option value="校內學習">校內學習</option>
+                    <option value="校外活動">校外活動</option>
+                    <option value="高中入學">高中入學</option>
+                    <option value="大學升學">大學升學</option>
+                    <option value="教職知能">教職知能</option>
+                </select>
+
+                <select id="unit-select" class="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    <option value="ALL">全部發布處室</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- 公告列表主區塊 -->
+        <main class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div id="notice-list" class="divide-y divide-gray-100">
+                <div class="p-8 text-center text-gray-400">正在讀取公告資料庫...</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 內文與附件 Modal 彈窗 -->
+    <div id="modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-3xl max-h-[85vh] rounded-xl shadow-xl overflow-hidden flex flex-col">
+            <!-- 彈窗頁首 -->
+            <div class="p-6 border-b flex justify-between items-start bg-gray-50">
+                <div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <span id="modal-category" class="text-xs font-semibold bg-blue-100 text-blue-700 px-2 py-0.5 rounded"></span>
+                        <span id="modal-unit" class="text-xs font-semibold bg-gray-100 text-gray-600 px-2 py-0.5 rounded"></span>
+                    </div>
+                    <h2 id="modal-title" class="text-xl font-bold text-gray-900 leading-snug"></h2>
+                    <p id="modal-meta" class="text-xs text-gray-400 mt-2"></p>
+                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl font-bold px-2">✕</button>
+            </div>
+            
+            <!-- 彈窗內文 -->
+            <div id="modal-body" class="p-6 overflow-y-auto leading-relaxed space-y-4 text-gray-700 flex-1"></div>
+
+            <!-- 彈窗附件區 -->
+            <div id="modal-files-container" class="p-4 bg-gray-50 border-t text-sm hidden">
+                <div class="font-bold text-gray-700 mb-2">📎 相關附件：</div>
+                <ul id="modal-files" class="space-y-1"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allNotices = [];
+
+        // 1. 初始化讀取 data.json
+        async function loadData() {
+            try {
+                const res = await fetch('data.json');
+                if (!res.ok) throw new Error("讀取 data.json 失敗");
+                
+                const data = await res.json();
+                
+                // 將物件陣列化並依 NID 由新到舊排序
+                allNotices = Object.values(data).sort((a, b) => Number(b.nid) - Number(a.nid));
+                
+                document.getElementById('status-text').innerText = `已同步 ${allNotices.length} 筆校園公告紀錄`;
+                
+                initUnitOptions();
+                renderList(allNotices);
+            } catch (err) {
+                document.getElementById('notice-list').innerHTML = `<div class="p-8 text-center text-red-500">資料讀取失敗，請確認 data.json 是否存在。</div>`;
+            }
+        }
+
+        // 2. 動態生成處室選項
+        function initUnitOptions() {
+            const units = [...new Set(allNotices.map(n => n.unit))].filter(Boolean);
+            const select = document.getElementById('unit-select');
+            units.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u;
+                opt.textContent = u;
+                select.appendChild(opt);
+            });
+        }
+
+        // 3. 渲染公告清單
+        function renderList(items) {
+            const container = document.getElementById('notice-list');
+            if (items.length === 0) {
+                container.innerHTML = `<div class="p-8 text-center text-gray-400">查無符合條件的公告</div>`;
+                return;
+            }
+
+            container.innerHTML = items.map(n => `
+                <div onclick="openModal('${n.nid}')" class="p-4 hover:bg-gray-50 transition cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2 text-xs text-gray-400">
+                            <span class="bg-blue-50 text-blue-600 font-medium px-2 py-0.5 rounded">${n.category || '未分類'}</span>
+                            <span class="bg-gray-100 text-gray-600 font-medium px-2 py-0.5 rounded">${n.unit}</span>
+                            <span>${n.date}</span>
+                        </div>
+                        <h3 class="text-base font-medium text-gray-800 hover:text-blue-600 transition">${n.title}</h3>
+                    </div>
+                    <div class="text-xs text-gray-400 whitespace-nowrap self-start sm:self-center">
+                        👁 ${n.clicks || 0}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 4. 即時多重條件篩選
+        function filterData() {
+            const keyword = document.getElementById('search-input').value.toLowerCase();
+            const category = document.getElementById('category-select').value;
+            const unit = document.getElementById('unit-select').value;
+
+            const filtered = allNotices.filter(n => {
+                const matchKeyword = (n.title && n.title.toLowerCase().includes(keyword)) || 
+                                     (n.content && n.content.toLowerCase().includes(keyword));
+                const matchCategory = category === 'ALL' || n.category === category;
+                const matchUnit = unit === 'ALL' || n.unit === unit;
+                
+                return matchKeyword && matchCategory && matchUnit;
+            });
+
+            renderList(filtered);
+        }
+
+        document.getElementById('search-input').addEventListener('input', filterData);
+        document.getElementById('category-select').addEventListener('change', filterData);
+        document.getElementById('unit-select').addEventListener('change', filterData);
+
+        // 5. Modal 彈窗控制
+        function openModal(nid) {
+            const n = allNotices.find(item => item.nid === nid);
+            if (!n) return;
+
+            document.getElementById('modal-title').innerText = n.title;
+            document.getElementById('modal-category').innerText = n.category || '未分類';
+            document.getElementById('modal-unit').innerText = n.unit;
+            document.getElementById('modal-meta').innerText = `發布日期：${n.date} | 點閱率：${n.clicks || 0}`;
+            document.getElementById('modal-body').innerHTML = n.content || '無內文說明';
+
+            // 處理附件顯示
+            const filesContainer = document.getElementById('modal-files-container');
+            const filesList = document.getElementById('modal-files');
+            
+            if (n.files && n.files.length > 0) {
+                filesList.innerHTML = n.files.map(f => `
+                    <li>
+                        <a href="${f.url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline flex items-center gap-1">
+                            📥 ${f.name}
+                        </a>
+                    </li>
+                `).join('');
+                filesContainer.classList.remove('hidden');
+            } else {
+                filesContainer.classList.add('hidden');
+            }
+
+            const modal = document.getElementById('modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // 鍵盤 Esc 鍵關閉彈窗
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // 頁面載入啟動
+        loadData();
+    </script>
 </body>
 </html>
