@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+  <channel>
+    <title>公告</title>
+    <link>https://richhuang.dev</link>
+    <description>公告</description>
+    <language>zh-TW</language>
+    <lastBuildDate>Tue, 08 Sep 2026 12:00:00 +0800</lastBuildDate>
+    
+    <!-- 第一篇文章項目 -->
+    <item>
+      <title>如何開始使用 RSS 訂閱最新文章</title>
+      <link>https://example.com/post-1</link>
+      <description>擺脫社群演算法的束縛，教你用 RSS 閱讀器輕鬆追蹤感興趣的網站與內容。</description>
+      <pubDate>Tue, 08 Sep 2026 10:00:00 +0800</pubDate>
+      <guid>https://example.com/post-1</guid>
+    </item>
+
+    <!-- 第二篇文章項目 -->
+    <item>
+      <title>2026 年網頁開發的新趨勢與技術分享</title>
+      <link>https://example.com/post-2</link>
+      <description>探討今年最熱門的前端與後端技術架構，幫助工程師快速掌握產業脈動。</description>
+      <pubDate>Mon, 07 Sep 2026 14:30:00 +0800</pubDate>
+      <guid>https://example.com/post-2</guid>
+    </item>
+
+  </channel>
+</rss>
